@@ -2,7 +2,10 @@
 
 ## Active Tasks
 
-1. Disconnect Lovable Cloud from the project (user request: use own Supabase instead of Lovable Cloud)
-   - Blocker: requires user confirmation; irreversible and deletes all cloud data
+1. Disconnect Lovable Cloud from the project (user confirmed; irreversible and deletes all cloud data)
+   - Status: must be done by user in Project Settings → Integrations → Lovable Cloud → Disconnect
+   - Note: no agent tool can disconnect Lovable Cloud; it is a manual workspace/project action
 2. Connect a user-owned Supabase project to the app
-   - Blocker: needs user to provide Supabase project URL, anon/public key, and service role key (or authorize via workspace Supabase connector)
+   - Status: available only after Lovable Cloud is disconnected
+   - Path: Project Settings → Integrations → Supabase → OAuth connect
+   - Note: no agent tool exists for external Supabase connect; user must complete OAuth flow in UI
