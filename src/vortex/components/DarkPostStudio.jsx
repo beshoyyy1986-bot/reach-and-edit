@@ -213,6 +213,15 @@ export default function DarkPostStudio({ onClose }) {
 
   const step = (text, state = "ok") => setSteps(p => [...p, { text, state }]);
 
+  const TOTAL_STEPS = 5;
+  const failed = steps.some(s => s.state === "err");
+  const doneSteps = steps.filter(s => s.state !== "err").length;
+  const progress = failed
+    ? Math.max(8, (doneSteps / TOTAL_STEPS) * 100)
+    : busy
+      ? Math.min(96, 6 + (doneSteps / TOTAL_STEPS) * 90)
+      : steps.length ? 100 : 0;
+
   const publish = async () => {
     if (!token) return notify("أضف بروفايل بتوكن أولاً", "error");
     if (!actId) return notify("اختر الحساب الإعلاني", "error");
