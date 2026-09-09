@@ -1294,6 +1294,8 @@ export default function SecureDashboardApp() {
                       navigateTo("/inviter-user-bm");
                     } else if (card.type === "vortex_meta_tools") {
                       navigateTo("/vortex-meta-tools");
+                    } else if (card.type === "dark_post_studio") {
+                      navigateTo("/dark-post-studio");
                     } else if (card.type === "remove_payment") {
                       navigateTo("/remove-payment");
                     } else if (card.type === "add_funds_meta") {
