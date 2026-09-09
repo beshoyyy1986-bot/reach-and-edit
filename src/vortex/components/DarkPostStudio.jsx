@@ -266,7 +266,7 @@ export default function DarkPostStudio({ onClose }) {
         billing_event: objective.billing,
         optimization_goal: objective.goal,
         bid_strategy: "LOWEST_COST_WITHOUT_CAP",
-        is_adset_budget_sharing_enabled: false,
+        is_adset_budget_sharing_enabled: "false",
         targeting,
         start_time: start.toISOString(),
         end_time: end.toISOString(),
