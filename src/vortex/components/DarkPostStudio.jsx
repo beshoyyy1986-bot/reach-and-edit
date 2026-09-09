@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import {
   CTA_TYPES, MetaError, OBJECTIVES, graphGet, graphGetAll, graphPost,
-  listRegions, searchCities, searchCountries, uploadAdImage,
+  listRegions, searchCountries, uploadAdImage,
 } from "../lib/metaApi.js";
 import {
   deleteProfile, getActiveId, listProfiles, saveProfile, setActiveId,
@@ -139,7 +139,7 @@ export default function DarkPostStudio({ onClose }) {
 
   /* ── creative form ── */
   const [form, setForm] = useState({
-    name: "Dark Post", message: "", headline: "", description: "",
+    name: "Dark Post", message: "", headline: "",
     link: "", cta: "LEARN_MORE", objective: "OUTCOME_TRAFFIC",
     budget: "10", days: "3", status: "PAUSED",
     gender: "all", ageMin: 18, ageMax: 65,
@@ -158,15 +158,12 @@ export default function DarkPostStudio({ onClose }) {
   };
 
   /* ── geo targeting ── */
-  const [geoMode, setGeoMode] = useState("country");  // country | region | city
+  const [geoMode, setGeoMode] = useState("country");  // country | region
   const [countryQ, setCountryQ] = useState("");
   const [countryOpts, setCountryOpts] = useState([]);
   const [country, setCountry] = useState(null);
   const [regions, setRegions] = useState([]);
   const [pickedRegions, setPickedRegions] = useState([]);
-  const [cityQ, setCityQ] = useState("");
-  const [cityOpts, setCityOpts] = useState([]);
-  const [pickedCities, setPickedCities] = useState([]);
   const [geoBusy, setGeoBusy] = useState(false);
 
   useEffect(() => {
@@ -178,7 +175,7 @@ export default function DarkPostStudio({ onClose }) {
   }, [countryQ, token]);
 
   const chooseCountry = async (c) => {
-    setCountry(c); setPickedRegions([]); setPickedCities([]); setRegions([]);
+    setCountry(c); setPickedRegions([]); setRegions([]);
     if (geoMode !== "country") {
       setGeoBusy(true);
       try { setRegions(await listRegions(c.country_code, token)); }
@@ -198,14 +195,6 @@ export default function DarkPostStudio({ onClose }) {
     }
   }, [geoMode, country, regions.length, token, notify]);
 
-  useEffect(() => {
-    if (geoMode !== "city" || !country || !token) return;
-    const id = setTimeout(async () => {
-      try { setCityOpts(await searchCities(cityQ, country.country_code, token)); } catch { /* ignore */ }
-    }, 400);
-    return () => clearTimeout(id);
-  }, [cityQ, geoMode, country, token]);
-
   const geoSpec = () => {
     if (!country) return null;
     if (geoMode === "country") return { countries: [country.country_code] };
@@ -214,8 +203,7 @@ export default function DarkPostStudio({ onClose }) {
       if (!list.length) return { countries: [country.country_code] };
       return { regions: list.map(r => ({ key: r.key })) };
     }
-    if (!pickedCities.length) return { countries: [country.country_code] };
-    return { cities: pickedCities.map(c => ({ key: c.key, radius: 25, distance_unit: "kilometer" })) };
+    return { countries: [country.country_code] };
   };
 
   /* ── publish ── */
@@ -310,7 +298,6 @@ export default function DarkPostStudio({ onClose }) {
               link: linkUrl,
               image_hash: h,
               name: form.headline || form.name,
-              description: form.description || undefined,
               call_to_action: cta,
             })),
           },
@@ -323,7 +310,6 @@ export default function DarkPostStudio({ onClose }) {
             link: linkUrl,
             image_hash: hashes[0],
             name: form.headline || undefined,
-            description: form.description || undefined,
             call_to_action: cta,
           },
         };
