@@ -10,7 +10,7 @@ import {
 
 /* ── shared styling ─────────────────────────────────────────── */
 const panel = "rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-xl shadow-[0_18px_60px_-30px_rgba(0,0,0,0.9)]";
-const field = "w-full rounded-xl border border-white/10 bg-[#0b0e17]/80 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-violet-400/60 focus:ring-2 focus:ring-violet-500/20";
+const field = "w-full rounded-xl border border-white/10 bg-[#0b0e17]/80 px-3 py-2 text-[13px] text-white placeholder:text-slate-500 outline-none transition duration-200 focus:border-violet-400/60 focus:ring-2 focus:ring-violet-500/20 hover:border-white/20";
 const label = "mb-1.5 block text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400";
 const primaryBtn = "inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-indigo-600 px-5 py-2.5 text-sm font-black text-white shadow-[0_10px_30px_-10px_rgba(139,92,246,0.9)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50";
 const ghostBtn = "inline-flex items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/5 px-4 py-2.5 text-sm font-bold text-slate-200 transition hover:bg-white/10 disabled:opacity-50";
@@ -22,17 +22,6 @@ function Spinner({ size = 16 }) {
 }
 Spinner.propTypes = { size: PropTypes.number };
 
-function Pill({ children, onRemove }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-500/15 px-2.5 py-1 text-xs font-semibold text-violet-200">
-      {children}
-      {onRemove && (
-        <button type="button" onClick={onRemove} className="text-violet-300/70 transition hover:text-white">×</button>
-      )}
-    </span>
-  );
-}
-Pill.propTypes = { children: PropTypes.node, onRemove: PropTypes.func };
 
 function Section({ title, hint, children, right }) {
   return (
@@ -213,6 +202,15 @@ export default function DarkPostStudio({ onClose }) {
 
   const step = (text, state = "ok") => setSteps(p => [...p, { text, state }]);
 
+  const TOTAL_STEPS = 5;
+  const failed = steps.some(s => s.state === "err");
+  const doneSteps = steps.filter(s => s.state !== "err").length;
+  const progress = failed
+    ? Math.max(8, (doneSteps / TOTAL_STEPS) * 100)
+    : busy
+      ? Math.min(96, 6 + (doneSteps / TOTAL_STEPS) * 90)
+      : steps.length ? 100 : 0;
+
   const publish = async () => {
     if (!token) return notify("أضف بروفايل بتوكن أولاً", "error");
     if (!actId) return notify("اختر الحساب الإعلاني", "error");
@@ -243,6 +241,7 @@ export default function DarkPostStudio({ onClose }) {
         status: form.status,
         special_ad_categories: [],
         buying_type: "AUCTION",
+        is_adset_budget_sharing_enabled: "false",
       }, token);
       step(`تم إنشاء الحملة ${campaign.id}`);
 
@@ -265,7 +264,7 @@ export default function DarkPostStudio({ onClose }) {
         billing_event: objective.billing,
         optimization_goal: objective.goal,
         bid_strategy: "LOWEST_COST_WITHOUT_CAP",
-        is_adset_budget_sharing_enabled: false,
+        is_adset_budget_sharing_enabled: "false",
         targeting,
         start_time: start.toISOString(),
         end_time: end.toISOString(),
@@ -392,6 +391,7 @@ export default function DarkPostStudio({ onClose }) {
         await graphPost(detail.adset.id, {
           name: edit.adsetName,
           status: edit.adsetStatus,
+          is_adset_budget_sharing_enabled: "false",
           ...(edit.budget ? { daily_budget: Math.round(Number(edit.budget) * 100) } : {}),
           ...(edit.endTime ? { end_time: new Date(edit.endTime).toISOString() } : {}),
           targeting: t,
@@ -561,10 +561,10 @@ export default function DarkPostStudio({ onClose }) {
 
         {/* ── CREATE ── */}
         {tab === "create" && (
-          <div className="mx-auto grid max-w-[1700px] items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mx-auto grid max-w-[1180px] items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
 
             {/* عمود 1 — الوجهة والمحتوى */}
-            <div className="space-y-5">
+            <div className="space-y-4">
               <Section title="الوجهة" hint="الحساب الإعلاني والصفحة اللي هيتنشر عليها الدارك بوست">
                 <div className="space-y-3">
                   <div>
@@ -581,22 +581,25 @@ export default function DarkPostStudio({ onClose }) {
                       {pages.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
+                  {loadingAssets && (
+                    <p className="flex items-center gap-2 text-[11px] text-violet-200"><Spinner size={12} /> جاري جلب الحسابات والصفحات…</p>
+                  )}
                 </div>
               </Section>
 
               <Section title="المحتوى الإبداعي" hint="ارفع صورة أو أكتر (أكتر من صورة = كاروسيل تلقائي)">
-                <div className="mb-3 flex flex-wrap gap-3">
+                <div className="mb-3 flex flex-wrap gap-2.5">
                   {images.map((img, i) => (
-                    <div key={i} className="group relative h-24 w-24 overflow-hidden rounded-xl border border-white/10">
+                    <div key={i} className="group relative h-20 w-20 overflow-hidden rounded-xl border border-white/10 transition duration-300 hover:scale-[1.04] hover:border-violet-400/50">
                       <img src={img.preview} alt="" className="h-full w-full object-cover" />
                       <button onClick={() => setImages(p => p.filter((_, x) => x !== i))}
-                        className="absolute inset-x-0 bottom-0 bg-black/70 py-1 text-[10px] font-bold text-red-300 opacity-0 transition group-hover:opacity-100">حذف</button>
+                        className="absolute inset-x-0 bottom-0 bg-black/70 py-1 text-[10px] font-bold text-red-300 opacity-0 transition duration-200 group-hover:opacity-100">حذف</button>
                       {img.hash && <span className="absolute top-1 end-1 rounded bg-emerald-500/80 px-1 text-[9px] font-black">✓</span>}
                     </div>
                   ))}
                   <button onClick={() => fileRef.current?.click()}
-                    className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-white/15 text-slate-400 transition hover:border-violet-400/50 hover:text-violet-300">
-                    <span className="text-2xl">＋</span><span className="text-[10px] font-bold">صورة</span>
+                    className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-white/15 text-slate-400 transition duration-300 hover:scale-[1.04] hover:border-violet-400/60 hover:text-violet-300">
+                    <span className="text-xl">＋</span><span className="text-[10px] font-bold">صورة</span>
                   </button>
                   <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={e => addFiles(e.target.files)} />
                 </div>
@@ -614,7 +617,7 @@ export default function DarkPostStudio({ onClose }) {
             </div>
 
             {/* عمود 2 — الهدف والاستهداف */}
-            <div className="space-y-5">
+            <div className="space-y-4">
               <Section title="الهدف والوجهة">
                 <div className="space-y-3">
                   <div>
@@ -648,8 +651,8 @@ export default function DarkPostStudio({ onClose }) {
                 <div className="mb-3 flex gap-1.5">
                   {[["country", "دولة كاملة"], ["region", "محافظات"]].map(([id, lb]) => (
                     <button key={id} onClick={() => setGeoMode(id)}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                        geoMode === id ? "bg-violet-600 text-white" : "bg-white/5 text-slate-400 hover:bg-white/10"}`}>{lb}</button>
+                      className={`rounded-lg px-3 py-1.5 text-xs font-bold transition duration-200 ${
+                        geoMode === id ? "bg-violet-600 text-white shadow-[0_8px_20px_-10px_rgba(139,92,246,0.9)]" : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"}`}>{lb}</button>
                   ))}
                 </div>
 
@@ -657,33 +660,35 @@ export default function DarkPostStudio({ onClose }) {
                 <input className={field} value={country ? `${country.name} (${country.country_code})` : countryQ}
                   onChange={e => { setCountry(null); setCountryQ(e.target.value); }} placeholder="اكتب اسم الدولة بالإنجليزية…" />
                 {!country && countryQ && (
-                  <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-white/10 bg-[#0b0e17]">
+                  <div className="mt-2 max-h-40 animate-[fade-in_0.25s_ease-out] overflow-y-auto rounded-xl border border-white/10 bg-[#0b0e17]">
                     {countryOpts.map(c => (
                       <button key={c.key || c.country_code} onClick={() => chooseCountry(c)}
-                        className="block w-full px-3 py-2 text-start text-sm text-slate-300 transition hover:bg-violet-500/15">{c.name}</button>
+                        className="block w-full px-3 py-2 text-start text-sm text-slate-300 transition duration-150 hover:bg-violet-500/15 hover:text-white">{c.name}</button>
                     ))}
                   </div>
                 )}
 
                 {geoMode === "region" && country && (
-                  <div className="mt-4">
+                  <div className="mt-4 animate-[fade-in_0.3s_ease-out]">
                     <div className="mb-2 flex items-center justify-between">
-                      <label className={label + " !mb-0"}>المحافظات {geoBusy && <Spinner size={12} />}</label>
+                      <label className={label + " !mb-0"}>
+                        المحافظات {geoBusy && <Spinner size={12} />}
+                        {!geoBusy && <span className="ms-1 text-violet-300">({pickedRegions.length || "الكل"})</span>}
+                      </label>
                       <div className="flex gap-2">
                         <button onClick={() => setPickedRegions(regions)} className={ghostBtn + " !px-2.5 !py-1 !text-[10px]"}>تحديد الكل</button>
                         <button onClick={() => setPickedRegions([])} className={ghostBtn + " !px-2.5 !py-1 !text-[10px]"}>مسح</button>
                       </div>
-                    </div>
-                    <div className="mb-2 flex flex-wrap gap-1.5">
-                      {pickedRegions.map(r => <Pill key={r.key} onRemove={() => setPickedRegions(p => p.filter(x => x.key !== r.key))}>{r.name}</Pill>)}
-                      {!pickedRegions.length && <span className="text-[11px] text-slate-500">لم تحدد شيئاً — سيتم استهداف كل محافظات الدولة.</span>}
                     </div>
                     <div className="max-h-44 overflow-y-auto rounded-xl border border-white/10 bg-[#0b0e17] p-1">
                       {regions.map(r => {
                         const on = pickedRegions.some(x => x.key === r.key);
                         return (
                           <button key={r.key} onClick={() => setPickedRegions(p => on ? p.filter(x => x.key !== r.key) : [...p, r])}
-                            className={`m-0.5 inline-block rounded-lg px-2.5 py-1 text-xs transition ${on ? "bg-violet-600 text-white" : "bg-white/5 text-slate-300 hover:bg-white/10"}`}>
+                            className={`m-0.5 inline-block rounded-lg px-2.5 py-1 text-xs transition duration-200 ${
+                              on
+                                ? "bg-violet-600 text-white shadow-[0_6px_18px_-8px_rgba(139,92,246,0.9)]"
+                                : "bg-white/5 text-slate-500 hover:bg-white/10 hover:text-slate-300"}`}>
                             {r.name}
                           </button>
                         );
@@ -717,49 +722,14 @@ export default function DarkPostStudio({ onClose }) {
               </Section>
             </div>
 
-            {/* عمود 3 — الميزانية والنشر والمعاينة */}
-            <div className="space-y-5">
-              <Section title="الميزانية والنشر" hint="كل إعلان يبدأ العرض تلقائياً بعد 15 دقيقة من لحظة النشر">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className={label}>اسم الإعلان</label>
-                    <input className={field} value={form.name} onChange={e => set("name", e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={label}>الميزانية اليومية ({currency})</label>
-                    <input className={field} type="number" min="1" step="0.01" value={form.budget} onChange={e => set("budget", e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={label}>المدة (أيام)</label>
-                    <input className={field} type="number" min="1" value={form.days} onChange={e => set("days", e.target.value)} />
-                  </div>
-                  <div>
-                    <label className={label}>حالة النشر</label>
-                    <div className="flex gap-2">
-                      {[["ACTIVE", "نشط ▶"], ["PAUSED", "متوقف ⏸"]].map(([id, lb]) => (
-                        <button key={id} onClick={() => set("status", id)}
-                          className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-bold transition ${
-                            form.status === id
-                              ? id === "ACTIVE" ? "bg-emerald-600 text-white" : "bg-amber-600 text-white"
-                              : "border border-white/10 bg-white/5 text-slate-400 hover:bg-white/10"}`}>{lb}</button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-3 rounded-xl border border-violet-400/20 bg-violet-500/10 px-3 py-2 text-[11px] text-violet-200">
-                  ⏱ موعد بدء العرض: بعد 15 دقيقة من النشر (تلقائي)
-                </p>
-                <button onClick={publish} disabled={busy} className={primaryBtn + " mt-4 w-full !py-3"}>
-                  {busy ? <><Spinner /> جاري النشر…</> : "🌑 نشر الدارك بوست"}
-                </button>
-              </Section>
-
+            {/* عمود 3 — المعاينة ثم النشر */}
+            <div className="space-y-4">
               <Section title="معاينة مباشرة">
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111827]">
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111827] transition duration-300 hover:border-violet-400/40">
                   <div className="flex items-center gap-2.5 p-3">
                     {page?.picture?.data?.url
-                      ? <img src={page.picture.data.url} alt="" className="h-10 w-10 rounded-full object-cover" />
-                      : <span className="h-10 w-10 rounded-full bg-white/10" />}
+                      ? <img src={page.picture.data.url} alt="" className="h-9 w-9 rounded-full object-cover" />
+                      : <span className="h-9 w-9 rounded-full bg-white/10" />}
                     <div>
                       <p className="text-sm font-bold">{page?.name || "اسم الصفحة"}</p>
                       <p className="text-[10px] text-slate-500">Sponsored · 🌐</p>
@@ -767,8 +737,8 @@ export default function DarkPostStudio({ onClose }) {
                   </div>
                   <p className="whitespace-pre-wrap px-3 pb-3 text-sm text-slate-200">{form.message || "نص الإعلان يظهر هنا…"}</p>
                   {images[0]
-                    ? <img src={images[0].preview} alt="" className="max-h-72 w-full object-cover" />
-                    : <div className="flex h-44 items-center justify-center bg-black/40 text-xs text-slate-600">لا توجد صورة</div>}
+                    ? <img src={images[0].preview} alt="" className="max-h-60 w-full object-cover" />
+                    : <div className="flex h-40 items-center justify-center bg-black/40 text-xs text-slate-600">لا توجد صورة</div>}
                   <div className="flex items-center justify-between gap-3 bg-[#0d1420] px-3 py-2.5">
                     <div className="min-w-0">
                       <p className="truncate text-[10px] uppercase text-slate-500">{form.link || (objective.messenger ? "MESSENGER" : "example.com")}</p>
@@ -781,14 +751,62 @@ export default function DarkPostStudio({ onClose }) {
                 </div>
               </Section>
 
+              <Section title="الميزانية والنشر" hint="كل إعلان يبدأ العرض تلقائياً بعد 15 دقيقة من لحظة النشر">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className={label}>الميزانية اليومية ({currency})</label>
+                    <input className={field} type="number" min="1" step="0.01" value={form.budget} onChange={e => set("budget", e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={label}>المدة (أيام)</label>
+                    <input className={field} type="number" min="1" value={form.days} onChange={e => set("days", e.target.value)} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={label}>حالة النشر</label>
+                    <div className="flex gap-2">
+                      {[["ACTIVE", "نشط ▶"], ["PAUSED", "متوقف ⏸"]].map(([id, lb]) => (
+                        <button key={id} onClick={() => set("status", id)}
+                          className={`flex-1 rounded-xl px-3 py-2.5 text-sm font-bold transition duration-200 ${
+                            form.status === id
+                              ? id === "ACTIVE" ? "bg-emerald-600 text-white" : "bg-amber-600 text-white"
+                              : "border border-white/10 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"}`}>{lb}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 rounded-xl border border-violet-400/20 bg-violet-500/10 px-3 py-2 text-[11px] text-violet-200">
+                  ⏱ موعد بدء العرض: بعد 15 دقيقة من النشر (تلقائي)
+                </p>
+                <button onClick={publish} disabled={busy} className={primaryBtn + " mt-4 w-full !py-3"}>
+                  {busy ? <><Spinner /> جاري النشر…</> : "🌑 نشر الدارك بوست"}
+                </button>
+
+                {(busy || steps.length > 0) && (
+                  <div className="mt-4">
+                    <div className="mb-1.5 flex items-center justify-between text-[11px] font-bold text-slate-400">
+                      <span>{busy ? "جاري التنفيذ…" : failed ? "توقف عند خطأ" : "تم"}</span>
+                      <span>{Math.round(progress)}%</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-white/8">
+                      <div
+                        className={`h-full rounded-full transition-[width] duration-700 ease-out ${
+                          failed ? "bg-red-500" : "bg-gradient-to-r from-violet-500 via-fuchsia-500 to-indigo-500"}`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </Section>
+
               {(steps.length > 0 || result) && (
                 <Section title="سجل النشر">
                   <ol className="space-y-1.5 text-xs">
                     {steps.map((s, i) => (
-                      <li key={i} className={s.state === "err" ? "text-red-300" : "text-emerald-300"}>
+                      <li key={i} className={`animate-[fade-in_0.3s_ease-out] ${s.state === "err" ? "text-red-300" : "text-emerald-300"}`}>
                         {s.state === "err" ? "✖" : "✔"} {s.text}
                       </li>
                     ))}
+                    {busy && <li className="flex items-center gap-2 text-violet-200"><Spinner size={12} /> الخطوة التالية…</li>}
                   </ol>
                   {result && (
                     <button onClick={() => { setTab("manage"); loadAd(result.adId); }} className={primaryBtn + " mt-4 w-full"}>
