@@ -14,7 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          allowed_types: string[] | null
+          avatar_url: string | null
+          created_at: string | null
+          current_session_id: string | null
+          email: string | null
+          fingerprint: string | null
+          id: string
+          is_frozen: boolean | null
+          last_seen_at: string | null
+          plan: string | null
+          role: string | null
+          subscription_expires_at: string | null
+          username: string | null
+        }
+        Insert: {
+          allowed_types?: string[] | null
+          avatar_url?: string | null
+          created_at?: string | null
+          current_session_id?: string | null
+          email?: string | null
+          fingerprint?: string | null
+          id: string
+          is_frozen?: boolean | null
+          last_seen_at?: string | null
+          plan?: string | null
+          role?: string | null
+          subscription_expires_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          allowed_types?: string[] | null
+          avatar_url?: string | null
+          created_at?: string | null
+          current_session_id?: string | null
+          email?: string | null
+          fingerprint?: string | null
+          id?: string
+          is_frozen?: boolean | null
+          last_seen_at?: string | null
+          plan?: string | null
+          role?: string | null
+          subscription_expires_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: number
+          mascot_bottom: number | null
+          mascot_enabled: boolean
+          mascot_right: number | null
+          mascot_size: number
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          mascot_bottom?: number | null
+          mascot_enabled?: boolean
+          mascot_right?: number | null
+          mascot_size?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          mascot_bottom?: number | null
+          mascot_enabled?: boolean
+          mascot_right?: number | null
+          mascot_size?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          message: string
+          priority: string
+          reply: string | null
+          status: string
+          subject: string
+          updated_at: string
+          user_email: string | null
+          user_id: string | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          message?: string
+          priority?: string
+          reply?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_email?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          message?: string
+          priority?: string
+          reply?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_email?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
