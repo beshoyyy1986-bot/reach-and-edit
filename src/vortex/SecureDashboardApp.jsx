@@ -969,6 +969,16 @@ export default function SecureDashboardApp() {
     );
   }
 
+  // ── Dark Post Studio — standalone page ────────────────────────
+  if (pathname === "/dark-post-studio") {
+    return (
+      <ToolPage>
+        <DarkPostStudio onClose={() => navigateTo("/")} />
+      </ToolPage>
+    );
+  }
+
+
   // ── BM Creator — standalone page ──────────────────────────────
   if (pathname === "/bm-creator") {
     return (
