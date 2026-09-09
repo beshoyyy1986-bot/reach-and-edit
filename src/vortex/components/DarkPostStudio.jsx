@@ -267,7 +267,8 @@ export default function DarkPostStudio({ onClose }) {
         publisher_platforms: ["facebook", "instagram"],
         targeting_automation: { advantage_audience: 0 },
       };
-      const start = new Date(Date.now() + 5 * 60 * 1000);
+      // العرض يبدأ تلقائياً بعد 15 دقيقة من لحظة النشر
+      const start = new Date(Date.now() + 15 * 60 * 1000);
       const end = new Date(start.getTime() + Number(form.days || 1) * 86400000);
       const adsetBody = {
         name: `${form.name} — Ad Set`,
@@ -276,6 +277,7 @@ export default function DarkPostStudio({ onClose }) {
         billing_event: objective.billing,
         optimization_goal: objective.goal,
         bid_strategy: "LOWEST_COST_WITHOUT_CAP",
+        is_adset_budget_sharing_enabled: false,
         targeting,
         start_time: start.toISOString(),
         end_time: end.toISOString(),
