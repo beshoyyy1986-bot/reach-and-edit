@@ -393,6 +393,7 @@ export default function DarkPostStudio({ onClose }) {
         await graphPost(detail.adset.id, {
           name: edit.adsetName,
           status: edit.adsetStatus,
+          is_adset_budget_sharing_enabled: "false",
           ...(edit.budget ? { daily_budget: Math.round(Number(edit.budget) * 100) } : {}),
           ...(edit.endTime ? { end_time: new Date(edit.endTime).toISOString() } : {}),
           targeting: t,
