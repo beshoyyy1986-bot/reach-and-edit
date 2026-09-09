@@ -22,17 +22,6 @@ function Spinner({ size = 16 }) {
 }
 Spinner.propTypes = { size: PropTypes.number };
 
-function Pill({ children, onRemove }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-500/15 px-2.5 py-1 text-xs font-semibold text-violet-200">
-      {children}
-      {onRemove && (
-        <button type="button" onClick={onRemove} className="text-violet-300/70 transition hover:text-white">×</button>
-      )}
-    </span>
-  );
-}
-Pill.propTypes = { children: PropTypes.node, onRemove: PropTypes.func };
 
 function Section({ title, hint, children, right }) {
   return (
